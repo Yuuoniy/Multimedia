@@ -94,9 +94,14 @@ venv.bak/
 .spyderproject
 .spyproject
 
+*/.ipynb_checkpoints/*
 # Rope project settings
 .ropeproject
 
+*.pdf
+*.docx
+*.zip
+*.pptx
 # mkdocs documentation
 /site
 
