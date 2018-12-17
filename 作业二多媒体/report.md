@@ -18,7 +18,7 @@
 
 ## 第一题
 ### a
-**哈夫曼编码**需要有关信息源的先验统计知识，而这样的信息通常很难获得。这在多媒体应用中表现尤为突出。在流式的音频和视频中，数据在到达之前是未知的。即使能够获得这些统计数字，符号表的传输仍然是相当大的一笔开销。
+**哈夫曼编码**需要有关信息源的先验统计知识，而这样的信息通常很难获得。这在多媒体应用中表现尤为突出。在流式的音频和视频中，数据在到达之前是未知的。即使能够获得这些统计数字，符号表的传输仍然是相当大的一笔开销。   
 **自适应哈夫曼编码**统计数字是随着数据流的到达而动态地收集和更新的。概率不再是基于先验知识二十基于到目前为止实际收到的数据。随着接收到的符号的概率分布的改变，符号将会被赋予新的码字。
 因此自适应哈夫曼编码在先验统计知识无法获得的时候，效果会比哈夫曼编码更好，适用于内容和统计数字快速变化的多媒体数据。而且节省了维护符号表的开销。
 
@@ -180,8 +180,8 @@ def quantization(dct_coefficient,quantization_matrix,quality_factor=0.1):
     return np.round(dct_coefficient/qm)  # rint = round to int 
 ```
 
-解码部分，实现以上模块的逆，思路相似：
-**反量化**
+解码部分，实现以上模块的逆，思路相似：  
+**反量化**   
 ```python
 def de_quantization(dct_result,quantization_matrix,quality_factor=0.1):
     dct_coefficient = quantization_matrix*dct_result*quality_factor
@@ -193,7 +193,7 @@ def idct(block_matrix, dct_matrix):
     idct_matrix = np.dot(np.dot(dct_matrix.transpose(),block_matrix), dct_matrix)
     return idct_matrix
 ```
-**拼接块**
+**拼接块**   
 ```python
 def combine_blocks(blocks,shape,block_size=8):
     img = np.zeros(shape,np.uint8);
@@ -203,7 +203,7 @@ def combine_blocks(blocks,shape,block_size=8):
       img[i:i+block_size, j:j+block_size] = block
     return img
 ```
-到这一步后我们得到` y,cb,cr` 各个通道，再进行对于 `Cb,Cr` 通道进行**逆采样**，使原来的一个像素点恢复成 2*2 的块
+到这一步后我们得到` y,cb,cr` 各个通道，再进行对于 `Cb,Cr` 通道进行**逆采样**，使原来的一个像素点恢复成 2*2 的块   
 ```python
 def inverse_sampling(samp_cb, samp_cb,height,width):
     src_cb, src_cr = np.zeros([height, width]), np.zeros([height, width])
@@ -214,7 +214,7 @@ def inverse_sampling(samp_cb, samp_cb,height,width):
             src_cr[i*2:i*2+2, j*2:j*2+2] = np.array([val_cr, val_cr, val_cr, val_cr]).reshape([2, 2])
     return src_cb, origin_cr
 ```
-最后**转化为 rgb**,得到压缩后的图片
+最后**转化为 rgb**,得到压缩后的图片   
 ```python
 def ycbcr2rgb(img, src_cb, src_cr, src_y):
     for i in range(img.shape[0]):
@@ -228,9 +228,9 @@ def ycbcr2rgb(img, src_cb, src_cr, src_y):
     return img
 ```
 
-因此流程为 **颜色转换->采样->分块->DCT->量化->反量化->IDCT->合并块->逆采样->颜色转换**，得到压缩后的 `jpeg` 图片
-将这个步骤进行整合
-`encoder` 函数，接收源图像路径，保存图像路径作为参数
+因此流程为 **颜色转换->采样->分块->DCT->量化->反量化->IDCT->合并块->逆采样->颜色转换**，得到压缩后的 `jpeg` 图片   
+将这个步骤进行整合  
+`encoder` 函数，接收源图像路径，保存图像路径作为参数   
 ```python
 def encoder(path,sava_path):
     im = Image.open(path)
@@ -256,7 +256,7 @@ def encoder(path,sava_path):
     cv2.imwrite(sava_path,img)
     return img
 ```
-`process` 函数为对 `y,cb,cr` 分别进行操作，参数为 1.通道(y,cb,cr)，2. 量化矩阵(对于 y,使用亮度量化矩阵，对于 cb,cr 使用色度量化矩阵)
+`process` 函数为对 `y,cb,cr` 分别进行操作，参数为 1.通道(y,cb,cr)，2. 量化矩阵(对于 y,使用亮度量化矩阵，对于 cb,cr 使用色度量化矩阵)   
 ```python
 def process(img,quantization_matrix):
     img = fit_block_size(img)
@@ -277,10 +277,11 @@ def process(img,quantization_matrix):
     res = combine_blocks(res_blocks,img.shape)
     return res
 ```
-完整代码在 `jpeg.py` 中
+完整代码在 `jpeg.py` 中   
 ### 结果对比部分
 
-**视觉效果对比**：
+**视觉效果对比**：  
+
 | 原图  | jpeg   | GIF  |
 |---|---|---- |
 |  ![enter image description here](./data/cartoon.jpg) |  ![enter image description here](./result/cartoon.jpeg) | ![enter image description here](./result/cartoon.gif)  |
@@ -289,22 +290,22 @@ def process(img,quantization_matrix):
 |---|---|---- |
 |  ![enter image description here](./data/animal.jpg) |  ![enter image description here](./result/animal.jpeg) | ![enter image description here](./result/animal.gif)  |
 
-通过查看视觉效果，发现 GIF 压缩后颜色效果并不好，失真度明显更高，jpeg 颜色显示相对清晰，但是因为压缩过程中高频信息的丢失，会出现一些异常点，这个可以调整量化过程的质量因子获得改善。
+通过查看视觉效果，发现 GIF 压缩后颜色效果并不好，失真度明显更高，jpeg 颜色显示相对清晰，但是因为压缩过程中高频信息的丢失，会出现一些异常点，这个可以调整量化过程的质量因子获得改善。  
 
 效果图可以在 `reslut` 文件夹中查看
 
 **压缩率**：
-压缩率=$\frac{B_0}{B_1}$
-其中$B_0$为压缩前数据的总位数，$B_1$为压缩后数据的总位数
- 1. 动物照片，压缩后 jpeg 图像大小为 `412KB`，量化部分的质量因子为 0.1， `GIF` 压缩后大小 411KB，为原 bmp 大小为 `2,097KB `
-       jpeg 压缩率：19.5%
-       GIF 压缩率：19.5%
-2. 卡通照片，压缩后 jpeg 图像大小为 228KB，量化部分的质量因子为 0.1，GIF 图像 349 KB, 原图 2,146KB 
+压缩率=$\frac{B_0}{B_1}$  
+其中$B_0$为压缩前数据的总位数，$B_1$为压缩后数据的总位数  
+ 1. 动物照片，压缩后 jpeg 图像大小为 `412KB`，量化部分的质量因子为 0.1， `GIF` 压缩后大小 411KB，为原 bmp 大小为 `2,097KB `  
+       jpeg 压缩率：`19.5%`
+       GIF 压缩率：`19.5%`
+2. 卡通照片，压缩后 jpeg 图像大小为 `228KB`，量化部分的质量因子为 0.1，GIF 图像 349 KB, 原图 2,146KB 
        `jpeg` 压缩率：`10.5%`
        `GIF` 压缩率：`16.2%`
 `jpeg` 的压缩率受量化部分的质量因子影响比较大，如果直接使用课本的量化表，不乘以量化因子，那么图像高频部分出现异常点，影响图像显示的效果。当然此时的压缩率也会比 `GIF` 高。
 
-**失真率**
+**失真率**  
 采用均方差进行量度
 公式：
 $\sigma^2=\frac{1}{N}\sum_{n=1}^N(x_n-y_n)^2$
@@ -330,4 +331,4 @@ def compare(img1,img2):
     diff+= diff_b
     return diff / (height * width*3)
 ```
-对于两张图片，GIF 的失真度均比 jpeg 算法失真度高
+对于两张图片，`GIF` 的失真度均比 `jpeg` 算法失真度高
