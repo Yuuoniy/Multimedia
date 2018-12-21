@@ -31,7 +31,9 @@
 
 | b 计数变成 3  | 和 a 进行交换  |
 |---|---|
-| ![enter image description here](./Assets/1.png)  | ![enter image description here](./Assets/2.png)  |
+| ![enter image description here](./Assets/1.png) | ![enter image description here](./Assets/2.png)  |
+
+ ![enter image description here](./Assets/1.png)
 
 接收到编码 01，代表 a, 因此 a 计数变为 3   
 ![enter image description here](./Assets/3.png)
